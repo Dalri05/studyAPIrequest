@@ -1,6 +1,7 @@
 import mysql.connector
 from fastapi import FastAPI
 
+
 app = FastAPI()
 
 try:
@@ -11,8 +12,8 @@ try:
         database="pessoas"
     )
     cursor = conexao.cursor()
-except mysql.connector.Error as err:
-    print(f"Erro de conexão com o banco de dados: {err}")
+except:
+    print("Erro de conexão com o banco de dados:")
     exit(1)
 
 class comandos:
@@ -27,14 +28,39 @@ class comandos:
         cursor.execute(comando)
         resultado = cursor.fetchall()
         return resultado
+    
+    def insert():
+        nome = input("digite o nome")
+        idade = int(input('digite a idade'))
+        email = input("digite o email")
+        comando =f'INSERT INTO usuarios (nome, idade, email) VALUES ("{nome}", "{idade}", "{email}")'
+        cursor.execute(comando)
+        conexao.commit()
 
-@app.get('/user')
-def get_user():
-    return comandos.read()
+    def delete(idnome):
+        comando = 'DELETE FROM pessoas.usuarios WHERE idnome=%s'
+        cursor.execute(comando, (idnome))
+        resultado = conexao.commit()
+        return resultado
 
-@app.get('/user/{idnome}')
-def get_userid(idnome:int):
-    return comandos.readuser(idnome)
+class req:
+    @app.get('/user')
+    def get_user():
+        return comandos.read()
+
+    @app.get('/user/{idnome}')
+    def get_userid(idnome:int):
+        return comandos.readuser(idnome)
+
+
+    @app.post('/insert')
+    def post_info():
+        return comandos.insert()
+    
+    @app.delete('/deleteuser/{idnome}')
+    def delete_user(idnome:int):
+        return comandos.delete()
+
 
 if __name__ == "__main__":
     import uvicorn
